@@ -1,0 +1,89 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'java-gradle-plugin'
+    id 'com.gradle.plugin-publish' version '0.15.0'
+    id 'maven-publish'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    compileOnly "com.android.tools.build:gradle:4.2.2"
+    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21"
+    implementation gradleApi()
+}
+
+// https://docs.gradle.org/current/userguide/java_gradle_plugin.html
+gradlePlugin {
+    plugins {
+        MuddyPlugin {
+            id = 'muddy-plugin'
+            implementationClass = 'io.github.porum.muddy.plugin.MuddyPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    // These settings are set for the whole plugin bundle
+    website = 'https://github.com/porum/Muddy'
+    vcsUrl = 'https://github.com/porum/Muddy.git'
+
+    // tags and description can be set for the whole bundle here, but can also
+    // be set / overridden in the config for specific plugins
+    tags = ['string-obfuscator', 'muddy', 'android plugin', 'asm']
+    description = 'Muddy is an Android Plugin for simple encryption of string constants.'
+
+    // The plugins block can contain multiple plugin entries.
+
+    // Plugin config blocks can set the id, displayName, version, description
+    // and tags for each plugin.
+
+    // id and displayName are mandatory.
+    // If no version is set, the project version will be used.
+    // If no tags or description are set, the tags or description from the
+    // pluginBundle block will be used, but they must be set in one of the
+    // two places.
+    plugins {
+        MuddyPlugin {
+            // id is captured from java-gradle-plugin configuration
+            displayName = 'Muddy plugin'
+        }
+    }
+}
+
+
+// Because the components are created only during the afterEvaluate phase, you must
+// configure your publications using the afterEvaluate() lifecycle method.
+afterEvaluate {
+
+    if (!plugins.hasPlugin("android")) {
+
+        task sourceJar(type: Jar) {
+            from sourceSets.main.allSource
+            archiveClassifier.set("sources")
+        }
+
+        // https://docs.gradle.org/current/userguide/publishing_maven.html
+        publishing {
+            publications {
+                // Creates a Maven publication called "release".
+                release(MavenPublication) {
+                    // The default Maven POM identifying attributes are mapped as follows:
+                    // groupId - project.group
+                    // artifactId - project.name
+                    // version - project.version
+
+                    // Applies the component for the release build variant.
+                    from components.java
+                    artifact sourceJar
+                }
+            }
+        }
+
+    }
+
+}

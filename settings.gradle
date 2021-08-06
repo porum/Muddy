@@ -1,0 +1,3 @@
+rootProject.name = "Muddy"
+include ':sample'
+include ':muddy-gradle-plugin'
