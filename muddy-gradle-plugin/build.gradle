@@ -22,7 +22,7 @@ gradlePlugin {
     plugins {
         MuddyPlugin {
             id = 'muddy-plugin'
-            implementationClass = 'io.github.porum.muddy.plugin.MuddyPlugin'
+            implementationClass = 'com.panda912.muddy.plugin.MuddyPlugin'
         }
     }
 }
