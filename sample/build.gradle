@@ -1,13 +1,13 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-//    id 'muddy-plugin'
+    id 'muddy-plugin'
 }
 
-//muddy {
-//    enable true
-//    key 2022
-//}
+muddy {
+    enable true
+    key 2022
+}
 
 android {
     compileSdk 30
