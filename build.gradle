@@ -2,10 +2,12 @@ import java.util.concurrent.TimeUnit
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    boolean localMode = project.getProperties().get("muddy.localMode", true).toBoolean()
+
     repositories {
         google()
         mavenCentral()
-        if (project.getProperties().get("muddy.localMode", true).toBoolean()) {
+        if (localMode) {
             mavenLocal()
         } else {
             maven { url 'https://jitpack.io' }
@@ -14,10 +16,11 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:4.2.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21"
-        classpath "com.github.porum.Muddy:muddy-gradle-plugin:1.0.0"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+//        if (localMode) {
+//            classpath "io.github.porum:muddy-gradle-plugin:1.0.0"
+//        } else {
+//            classpath "com.github.porum.Muddy:muddy-gradle-plugin:1.0.0"
+//        }
     }
 }
 
