@@ -44,7 +44,7 @@ class MuddyTransform(
     super.transform(transformInvocation)
 
     val isIncremental = transformInvocation.isIncremental && isIncremental
-    Log.i(name, "isIncremental: $isIncremental")
+    Log.i(name, "isIncremental: $isIncremental, key: ${extension.muddyKey}, enable: ${extension.enable}")
 
     // directory or jar path
     val io = ConcurrentHashMap<File, File>()

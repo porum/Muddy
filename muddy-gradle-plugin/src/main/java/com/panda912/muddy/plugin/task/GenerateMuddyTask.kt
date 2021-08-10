@@ -5,6 +5,7 @@ import com.panda912.muddy.plugin.DefaultMuddyExtension
 import com.panda912.muddy.plugin.bytecode.MuddyDump
 import com.panda912.muddy.plugin.task.factory.TaskCreationAction
 import com.panda912.muddy.plugin.utils.C
+import com.panda912.muddy.plugin.utils.Log
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.CacheableTask
@@ -61,6 +62,7 @@ abstract class GenerateMuddyTask : DefaultTask() {
     }
 
     override fun configure(task: GenerateMuddyTask) {
+      Log.i(name, "configure key: ${extension.muddyKey}")
       task.classesDir = outputClassDir
       task.muddyKey = extension.muddyKey
       task.dependsOn(variant.javaCompileProvider)
