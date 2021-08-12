@@ -92,4 +92,12 @@ public class Util {
     String relativePath = FileUtils.relativePossiblyNonExistingPath(file, rootPath);
     return FileUtils.toSystemIndependentPath(relativePath);
   }
+
+  public static boolean ensureParentDirsCreated(File file) {
+    File parent = file.getParentFile();
+    if (!parent.exists()) {
+      return parent.mkdirs();
+    }
+    return true;
+  }
 }

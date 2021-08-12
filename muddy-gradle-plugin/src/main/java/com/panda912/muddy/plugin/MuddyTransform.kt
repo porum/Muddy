@@ -105,7 +105,7 @@ class MuddyTransform(
           }
         } else {
           output.deleteRecursively()
-          input.walkBottomUp().filter { it.isFile }.forEach {
+          input.walkBottomUp().toList().parallelStream().filter { it.isFile }.forEach {
             val outputClassFile = Util.getOutputFile(input, it, output)
             it.copyTo(outputClassFile)
           }
@@ -142,13 +142,13 @@ class MuddyTransform(
         } else {
           // delete old directories
           output.deleteRecursively()
-          // find all class files, but except Muddy.class
-          input.walkBottomUp().filter { it.isFile }.forEach {
+          // find all class files, exclude Muddy.class
+          input.walkBottomUp().toList().parallelStream().filter { it.isFile }.forEach {
             //            Log.i(name, "classFile: $it")
             val outputClassFile = Util.getOutputFile(input, it, output)
             //            Log.i(name, "output: $outputClassFile")
             if (it.name.endsWith(SdkConstants.DOT_CLASS) && it.nameWithoutExtension != "Muddy") {
-              outputClassFile.ensureParentDirsCreated()
+              Util.ensureParentDirsCreated(outputClassFile)
               generateNewClass(it, outputClassFile)
             } else {
               it.copyTo(outputClassFile, true)
