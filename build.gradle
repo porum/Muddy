@@ -17,9 +17,9 @@ buildscript {
         classpath "com.android.tools.build:gradle:4.2.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21"
         if (localMode) {
-            classpath "io.github.porum:muddy-gradle-plugin:1.0.0"
+            classpath "io.github.porum:muddy-gradle-plugin:1.0.1"
         } else {
-            classpath "com.github.porum.Muddy:muddy-gradle-plugin:1.0.0"
+            classpath "com.github.porum.Muddy:muddy-gradle-plugin:1.0.1"
         }
     }
 }
