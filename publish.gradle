@@ -1,0 +1,79 @@
+apply plugin: "maven-publish"
+apply plugin: "signing"
+
+// Because the components are created only during the afterEvaluate phase, you must
+// configure your publications using the afterEvaluate() lifecycle method.
+afterEvaluate {
+
+    if (!plugins.hasPlugin("android")) {
+
+        task sourceJar(type: Jar) {
+            from sourceSets.main.allSource
+            archiveClassifier.set("sources")
+        }
+
+        task javadocJar(type: Jar, dependsOn: javadoc) {
+            archiveClassifier.set("javadoc")
+            from javadoc.destinationDir
+        }
+
+        // https://docs.gradle.org/current/userguide/publishing_maven.html
+        publishing {
+            publications {
+                // Creates a Maven publication called "release".
+                release(MavenPublication) {
+                    // The default Maven POM identifying attributes are mapped as follows:
+                    // groupId - project.group
+                    // artifactId - project.name
+                    // version - project.version
+
+                    // Applies the component for the release build variant.
+                    from components.java
+                    artifact sourceJar
+                    artifact javadocJar
+
+                    pom {
+                        name = 'muddy-plugin'
+                        description = 'Muddy is an Android Plugin for simple encryption of string constants in android project.'
+                        url = 'https://github.com/porum/Muddy'
+                        licenses {
+                            license {
+                                name = 'The Apache License, Version 2.0'
+                                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id = 'porum'
+                                name = 'sunguo.sun'
+                                email = 'sunguobao12@gmail.com'
+                            }
+                        }
+                        scm {
+                            url = "https://github.com/porum/Muddy.git"
+                        }
+                    }
+                }
+            }
+
+            repositories {
+                maven {
+                    url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+                    credentials {
+                        username REPOSITORY_USERNAME
+                        password REPOSITORY_PASSWORD
+                    }
+                }
+            }
+        }
+        signing {
+            sign publishing.publications.release
+        }
+
+        javadoc {
+            if(JavaVersion.current().isJava9Compatible()) {
+                options.addBooleanOption('html5', true)
+            }
+        }
+    }
+}
