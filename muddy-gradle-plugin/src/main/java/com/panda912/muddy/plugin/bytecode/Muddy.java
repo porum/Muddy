@@ -43,19 +43,4 @@ public class Muddy {
     constMap.put(plainText, result);
     return result;
   }
-
-//  public static String xor(String plainText) {
-//    String result = constMap.get(plainText);
-//    if (result != null) {
-//      return result;
-//    }
-//
-//    char[] ch = plainText.toCharArray();
-//    for (int i = 0; i < ch.length; i++) {
-//      ch[i] = (char) (ch[i] ^ 2012);
-//    }
-//    result = new String(ch);
-//    constMap.put(plainText, result);
-//    return result;
-//  }
 }

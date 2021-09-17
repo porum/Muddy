@@ -58,7 +58,11 @@ afterEvaluate {
 
             repositories {
                 maven {
-                    url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+                    if (VERSION.endsWith("-SNAPSHOT")) {
+                        url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                    } else {
+                        url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                    }
                     credentials {
                         username sonatypeUserName
                         password sonatypePassword
