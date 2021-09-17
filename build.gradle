@@ -2,34 +2,16 @@ import java.util.concurrent.TimeUnit
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    boolean localMode = project.getProperties().get("muddy.localMode", true).toBoolean()
 
     repositories {
         google()
+        mavenLocal()
         mavenCentral()
-        if (localMode) {
-            mavenLocal()
-        } else {
-            maven { url 'https://jitpack.io' }
-        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.2.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21"
-        if (localMode) {
-            classpath "io.github.porum:muddy-gradle-plugin:1.0.1"
-        } else {
-            classpath "com.github.porum.Muddy:muddy-gradle-plugin:1.0.1"
-        }
-    }
-}
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-static def SigningFromLocalProperties(properties, project, String prop) {
-    if (properties.getProperty(prop)) {
-        project.ext[prop] = properties.getProperty(prop)
+        classpath "io.github.porum:muddy-gradle-plugin:1.0.1"
     }
 }
 
@@ -40,6 +22,7 @@ allprojects {
 
     repositories {
         google()
+        mavenLocal()
         mavenCentral()
     }
 
@@ -50,12 +33,6 @@ allprojects {
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
     }
-
-    SigningFromLocalProperties(properties, project, 'REPOSITORY_USERNAME' as String)
-    SigningFromLocalProperties(properties, project, 'REPOSITORY_PASSWORD' as String)
-    SigningFromLocalProperties(properties, project, 'signing.keyId' as String)
-    SigningFromLocalProperties(properties, project, 'signing.password' as String)
-    SigningFromLocalProperties(properties, project, 'signing.secretKeyRingFile' as String)
 }
 
 File publishScript = project.file("publish.gradle")

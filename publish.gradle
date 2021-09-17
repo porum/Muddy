@@ -60,8 +60,8 @@ afterEvaluate {
                 maven {
                     url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
                     credentials {
-                        username REPOSITORY_USERNAME
-                        password REPOSITORY_PASSWORD
+                        username sonatypeUserName
+                        password sonatypePassword
                     }
                 }
             }
@@ -71,7 +71,7 @@ afterEvaluate {
         }
 
         javadoc {
-            if(JavaVersion.current().isJava9Compatible()) {
+            if (JavaVersion.current().isJava9Compatible()) {
                 options.addBooleanOption('html5', true)
             }
         }
