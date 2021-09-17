@@ -7,14 +7,17 @@ import com.android.utils.FileUtils
 import com.panda912.muddy.plugin.bytecode.ModifyClassVisitor
 import com.panda912.muddy.plugin.utils.Log
 import com.panda912.muddy.plugin.utils.Util
-import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
 
 /**
  * Created by panda on 2021/7/28 9:10
@@ -44,7 +47,10 @@ class MuddyTransform(
     super.transform(transformInvocation)
 
     val isIncremental = transformInvocation.isIncremental && isIncremental
-    Log.i(name, "isIncremental: $isIncremental, key: ${extension.muddyKey}, enable: ${extension.enable}")
+    Log.i(
+      name,
+      "isIncremental: $isIncremental, key: ${extension.muddyKey}, enable: ${extension.enable}"
+    )
 
     // directory or jar path
     val io = ConcurrentHashMap<File, File>()
@@ -123,18 +129,14 @@ class MuddyTransform(
     isIncremental: Boolean
   ) {
     io.forEach { (input, output) ->
-      if (input.isDirectory) {
+      if (input.isDirectory) { // directory
         if (isIncremental) {
           changedFiles.filter { it.key.startsWith(input) }.forEach { (changedFile, status) ->
             val outputClassFile = Util.getOutputFile(input, changedFile, output)
             when (status) {
               Status.ADDED,
               Status.CHANGED -> {
-                //                Log.i(name, "input: $input")
-                //                Log.i(name, "output: $output")
-                //                Log.i(name, "changedFile: $changedFile")
-                //                Log.i(name, "outputClassFile: $outputClassFile")
-                generateNewClass(changedFile, outputClassFile)
+                modifyBytecode(changedFile, outputClassFile)
               }
               Status.REMOVED -> FileUtils.deleteIfExists(outputClassFile)
             }
@@ -144,33 +146,71 @@ class MuddyTransform(
           output.deleteRecursively()
           // find all class files, exclude Muddy.class
           input.walkBottomUp().toList().parallelStream().filter { it.isFile }.forEach {
-            //            Log.i(name, "classFile: $it")
             val outputClassFile = Util.getOutputFile(input, it, output)
-            //            Log.i(name, "output: $outputClassFile")
             if (it.name.endsWith(SdkConstants.DOT_CLASS) && it.nameWithoutExtension != "Muddy") {
               Util.ensureParentDirsCreated(outputClassFile)
-              generateNewClass(it, outputClassFile)
+              modifyBytecode(it, outputClassFile)
             } else {
               it.copyTo(outputClassFile, true)
             }
           }
         }
-      } else {
-        output.deleteRecursively()
-        input.copyRecursively(output, true)
+      } else { // jar
+        if (isIncremental) {
+          when (changedFiles[input]) {
+            Status.ADDED,
+            Status.CHANGED -> {
+              FileUtils.deleteIfExists(output)
+              handleJar(input, output)
+            }
+            Status.REMOVED -> FileUtils.deleteIfExists(output)
+          }
+        } else {
+          FileUtils.deleteIfExists(output)
+          handleJar(input, output)
+        }
       }
     }
+  }
+
+  @Throws(IOException::class)
+  private fun handleJar(inputJar: File, outputJar: File) {
+    val jarFile = JarFile(inputJar)
+    val jos = JarOutputStream(outputJar.outputStream().buffered())
+    jarFile.entries().iterator().forEachRemaining { entry ->
+      if (!entry.isDirectory) {
+        val inputStream = jarFile.getInputStream(entry)
+        val bytes = if (entry.name.endsWith(".class")) {
+          getModifiedJarClass(inputStream)
+        } else {
+          inputStream.readBytes()
+        }
+        jos.putNextEntry(JarEntry(entry.name))
+        jos.write(bytes)
+      }
+    }
+    jos.finish()
+    jos.flush()
+    jos.close()
+  }
+
+  private fun getModifiedJarClass(inputStream: InputStream): ByteArray {
+    val cr = ClassReader(inputStream)
+    val cw = ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
+    val cv = ModifyClassVisitor(Opcodes.ASM7, cw, extension.muddyKey)
+    cr.accept(cv, 0)
+    return cw.toByteArray()
   }
 
   /**
    * modify input class and then output to dist file
    */
   @Throws(IOException::class)
-  private fun generateNewClass(input: File, output: File) {
+  private fun modifyBytecode(input: File, output: File) {
     val cr = ClassReader(FileInputStream(input))
     val cw = ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-    val cv = ModifyClassVisitor(Opcodes.ASM5, cw, extension.muddyKey)
-    cr.accept(cv, Opcodes.ASM5)
+    val cv = ModifyClassVisitor(Opcodes.ASM7, cw, extension.muddyKey)
+    cr.accept(cv, 0)
     output.writeBytes(cw.toByteArray())
   }
 

@@ -77,7 +77,7 @@ public class ModifyClassVisitor extends ClassVisitor implements Opcodes {
     clinitExist = C.CLINIT.equals(name) && !clinitExist;
 
     MethodVisitor mv = cv.visitMethod(access, name, descriptor, signature, exceptions);
-    return new ModifyConstVisitor(ASM5, mv, owner, name, constFieldMap, muddyKey);
+    return new ModifyConstVisitor(ASM7, mv, owner, name, constFieldMap, muddyKey);
   }
 
   @Override
