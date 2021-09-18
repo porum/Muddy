@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.panda912.muddy.plugin.bytecode;
+package com.panda912.muddy.plugin;
 
 import java.util.HashMap;
 import java.util.Map;

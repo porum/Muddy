@@ -18,5 +18,12 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
 
     findViewById<TextView>(R.id.textview).text = TAG
+
+
+    val array = arrayOf("panda", "asm", "muddy", "gradle-plugin")
+
+    val arr = arrayOf(
+      java.lang.String.format("name: %s", "panda")
+    )
   }
 }

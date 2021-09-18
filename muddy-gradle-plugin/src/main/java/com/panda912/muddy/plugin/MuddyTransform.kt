@@ -4,7 +4,7 @@ import com.android.SdkConstants
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
-import com.panda912.muddy.plugin.bytecode.Muddy
+import com.panda912.muddy.plugin.extension.DefaultMuddyExtension
 import com.panda912.muddy.plugin.utils.Log
 import com.panda912.muddy.plugin.utils.MUDDY_CLASS
 import com.panda912.muddy.plugin.utils.Util

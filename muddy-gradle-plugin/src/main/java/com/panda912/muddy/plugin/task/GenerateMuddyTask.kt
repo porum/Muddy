@@ -1,8 +1,8 @@
 package com.panda912.muddy.plugin.task
 
 import com.android.build.gradle.api.BaseVariant
-import com.panda912.muddy.plugin.DefaultMuddyExtension
-import com.panda912.muddy.plugin.bytecode.MuddyDump
+import com.panda912.muddy.plugin.extension.DefaultMuddyExtension
+import com.panda912.muddy.plugin.MuddyDump
 import com.panda912.muddy.plugin.task.factory.TaskCreationAction
 import com.panda912.muddy.plugin.utils.Log
 import com.panda912.muddy.plugin.utils.MUDDY_CLASS

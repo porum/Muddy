@@ -1,4 +1,4 @@
-package com.panda912.muddy.plugin.bytecode
+package com.panda912.muddy.plugin
 
 import com.panda912.muddy.plugin.utils.MUDDY_CLASS
 import com.panda912.muddy.plugin.utils.toInternalName

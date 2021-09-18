@@ -2,6 +2,8 @@ package com.panda912.muddy.plugin
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
+import com.panda912.muddy.plugin.extension.DefaultMuddyExtension
+import com.panda912.muddy.plugin.extension.MuddyExtension
 import com.panda912.muddy.plugin.task.GenerateMuddyTask
 import com.panda912.muddy.plugin.task.factory.registerTask
 import org.gradle.api.GradleException
