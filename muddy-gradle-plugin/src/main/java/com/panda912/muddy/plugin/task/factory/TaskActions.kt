@@ -7,7 +7,7 @@ import org.gradle.api.tasks.TaskProvider
 /**
  * Basic task information for creation
  */
-interface TaskInformation<TaskT: Task> {
+interface TaskInformation<TaskT : Task> {
   /** The name of the task to be created.  */
   val name: String
 
@@ -35,7 +35,7 @@ abstract class TaskCreationAction<TaskT : Task> : TaskInformation<TaskT>, PreCon
 /**
  * Configuration Action for tasks.
  */
-interface TaskConfigAction<TaskT: Task> {
+interface TaskConfigAction<TaskT : Task> {
 
   /** Configures the task. */
   fun configure(task: TaskT)
@@ -61,6 +61,6 @@ interface PreConfigAction {
  *
  * Once a TaskProvider is created this is called to process it.
  */
-interface TaskProviderCallback<TaskT: Task> {
+interface TaskProviderCallback<TaskT : Task> {
   fun handleProvider(taskProvider: TaskProvider<TaskT>)
 }

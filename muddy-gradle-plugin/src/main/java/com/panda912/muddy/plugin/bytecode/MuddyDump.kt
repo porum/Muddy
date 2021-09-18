@@ -1,6 +1,7 @@
 package com.panda912.muddy.plugin.bytecode
 
-import com.panda912.muddy.plugin.utils.C
+import com.panda912.muddy.plugin.utils.MUDDY_CLASS
+import com.panda912.muddy.plugin.utils.toInternalName
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes
@@ -19,7 +20,7 @@ object MuddyDump {
       visit(
         Opcodes.V1_7,
         Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER,
-        C.MUDDY_CLASS,
+        MUDDY_CLASS.toInternalName(),
         null,
         Type.getInternalName(Object::class.java),
         null
@@ -38,7 +39,13 @@ object MuddyDump {
     with(cw.visitMethod(Opcodes.ACC_PRIVATE, "<init>", "()V", null, null)) {
       visitCode()
       visitVarInsn(Opcodes.ALOAD, 0)
-      visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(Object::class.java), "<init>", "()V", false)
+      visitMethodInsn(
+        Opcodes.INVOKESPECIAL,
+        Type.getInternalName(Object::class.java),
+        "<init>",
+        "()V",
+        false
+      )
       visitInsn(Opcodes.RETURN)
       visitMaxs(1, 1)
       visitEnd()
@@ -54,7 +61,7 @@ object MuddyDump {
       )
     ) {
       visitCode()
-      visitFieldInsn(Opcodes.GETSTATIC, C.MUDDY_CLASS, "constMap", "Ljava/util/Map;")
+      visitFieldInsn(Opcodes.GETSTATIC, MUDDY_CLASS.toInternalName(), "constMap", "Ljava/util/Map;")
       visitVarInsn(Opcodes.ALOAD, 0)
       visitMethodInsn(
         Opcodes.INVOKEINTERFACE,
@@ -100,7 +107,7 @@ object MuddyDump {
       visitVarInsn(Opcodes.ALOAD, 2)
       visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/String", "<init>", "([C)V", false)
       visitVarInsn(Opcodes.ASTORE, 1)
-      visitFieldInsn(Opcodes.GETSTATIC, C.MUDDY_CLASS, "constMap", "Ljava/util/Map;")
+      visitFieldInsn(Opcodes.GETSTATIC, MUDDY_CLASS.toInternalName(), "constMap", "Ljava/util/Map;")
       visitVarInsn(Opcodes.ALOAD, 0)
       visitVarInsn(Opcodes.ALOAD, 1)
       visitMethodInsn(
@@ -122,7 +129,7 @@ object MuddyDump {
       visitTypeInsn(Opcodes.NEW, "java/util/HashMap")
       visitInsn(Opcodes.DUP)
       visitMethodInsn(Opcodes.INVOKESPECIAL, "java/util/HashMap", "<init>", "()V", false)
-      visitFieldInsn(Opcodes.PUTSTATIC, C.MUDDY_CLASS, "constMap", "Ljava/util/Map;")
+      visitFieldInsn(Opcodes.PUTSTATIC, MUDDY_CLASS.toInternalName(), "constMap", "Ljava/util/Map;")
       visitInsn(Opcodes.RETURN)
       visitMaxs(2, 0)
       visitEnd()

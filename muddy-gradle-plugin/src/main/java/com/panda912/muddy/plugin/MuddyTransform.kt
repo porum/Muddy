@@ -4,14 +4,16 @@ import com.android.SdkConstants
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
-import com.panda912.muddy.plugin.bytecode.ModifyClassVisitor
+import com.panda912.muddy.plugin.bytecode.Muddy
 import com.panda912.muddy.plugin.utils.Log
+import com.panda912.muddy.plugin.utils.MUDDY_CLASS
 import com.panda912.muddy.plugin.utils.Util
+import com.panda912.muddy.plugin.utils.toInternalName
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.tree.*
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
@@ -136,7 +138,7 @@ class MuddyTransform(
             when (status) {
               Status.ADDED,
               Status.CHANGED -> {
-                modifyBytecode(changedFile, outputClassFile)
+                outputClassFile.writeBytes(getModifiedClass(changedFile.inputStream()))
               }
               Status.REMOVED -> FileUtils.deleteIfExists(outputClassFile)
             }
@@ -149,7 +151,7 @@ class MuddyTransform(
             val outputClassFile = Util.getOutputFile(input, it, output)
             if (it.name.endsWith(SdkConstants.DOT_CLASS) && it.nameWithoutExtension != "Muddy") {
               Util.ensureParentDirsCreated(outputClassFile)
-              modifyBytecode(it, outputClassFile)
+              outputClassFile.writeBytes(getModifiedClass(it.inputStream()))
             } else {
               it.copyTo(outputClassFile, true)
             }
@@ -181,7 +183,7 @@ class MuddyTransform(
       if (!entry.isDirectory) {
         val inputStream = jarFile.getInputStream(entry)
         val bytes = if (entry.name.endsWith(".class")) {
-          getModifiedJarClass(inputStream)
+          getModifiedClass(inputStream)
         } else {
           inputStream.readBytes()
         }
@@ -194,24 +196,66 @@ class MuddyTransform(
     jos.close()
   }
 
-  private fun getModifiedJarClass(inputStream: InputStream): ByteArray {
-    val cr = ClassReader(inputStream)
-    val cw = ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-    val cv = ModifyClassVisitor(Opcodes.ASM7, cw, extension.muddyKey)
-    cr.accept(cv, 0)
-    return cw.toByteArray()
-  }
-
-  /**
-   * modify input class and then output to dist file
-   */
   @Throws(IOException::class)
-  private fun modifyBytecode(input: File, output: File) {
-    val cr = ClassReader(FileInputStream(input))
-    val cw = ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-    val cv = ModifyClassVisitor(Opcodes.ASM7, cw, extension.muddyKey)
-    cr.accept(cv, 0)
-    output.writeBytes(cw.toByteArray())
+  private fun getModifiedClass(inputStream: InputStream): ByteArray {
+    val cr = ClassReader(inputStream)
+    val cn = ClassNode(Opcodes.ASM7)
+    cr.accept(cn, 0)
+
+    val constFields: List<FieldNode> = cn.fields.filter {
+      it.desc == "Ljava/lang/String;" && !(it.value as? String).isNullOrEmpty() &&
+          (it.access == Opcodes.ACC_STATIC + Opcodes.ACC_FINAL ||
+              it.access == Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC + Opcodes.ACC_FINAL ||
+              it.access == Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + Opcodes.ACC_FINAL ||
+              it.access == Opcodes.ACC_PROTECTED + Opcodes.ACC_STATIC + Opcodes.ACC_FINAL)
+    }
+
+    for (method in cn.methods) {
+      if (method.name == "<clinit>") {
+        val insnList = InsnList()
+        for (field in constFields) {
+          insnList.add(LdcInsnNode(Muddy.xor(field.value as String, extension.muddyKey)))
+          insnList.add(
+            MethodInsnNode(
+              Opcodes.INVOKESTATIC,
+              MUDDY_CLASS.toInternalName(),
+              "xor",
+              "(Ljava/lang/String;)Ljava/lang/String;",
+              false
+            )
+          )
+          insnList.add(
+            FieldInsnNode(
+              Opcodes.PUTSTATIC,
+              cn.name,
+              field.name,
+              "Ljava/lang/String;"
+            )
+          )
+        }
+        insnList.add(method.instructions)
+        method.instructions = insnList
+      } else {
+        for (i in 0 until method.instructions.size()) {
+          val insn = method.instructions[i]
+          if (insn is LdcInsnNode && insn.cst is String) {
+            insn.cst = Muddy.xor(insn.cst as String, extension.muddyKey)
+            val muddyMethodInsn = MethodInsnNode(
+              Opcodes.INVOKESTATIC,
+              MUDDY_CLASS.toInternalName(),
+              "xor",
+              "(Ljava/lang/String;)Ljava/lang/String;",
+              false
+            )
+            method.instructions.insert(insn, muddyMethodInsn)
+          }
+        }
+      }
+    }
+
+    val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
+    cn.accept(cw)
+    return cw.toByteArray()
   }
 
 }

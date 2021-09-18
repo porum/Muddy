@@ -4,8 +4,9 @@ import com.android.build.gradle.api.BaseVariant
 import com.panda912.muddy.plugin.DefaultMuddyExtension
 import com.panda912.muddy.plugin.bytecode.MuddyDump
 import com.panda912.muddy.plugin.task.factory.TaskCreationAction
-import com.panda912.muddy.plugin.utils.C
 import com.panda912.muddy.plugin.utils.Log
+import com.panda912.muddy.plugin.utils.MUDDY_CLASS
+import com.panda912.muddy.plugin.utils.toInternalName
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.CacheableTask
@@ -36,7 +37,7 @@ abstract class GenerateMuddyTask : DefaultTask() {
   fun taskAction() {
     classesDir.deleteRecursively()
     Files.createDirectories(Paths.get(classesDir.toURI()))
-    val target = File(classesDir, "${C.MUDDY_CLASS}.class")
+    val target = File(classesDir, MUDDY_CLASS.toInternalName() + ".class")
     target.ensureParentDirsCreated()
     target.writeBytes(MuddyDump.dump(muddyKey))
   }
