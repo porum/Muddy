@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.panda912.muddy">
+    package="com.panda912.muddy.sample">
 
     <application
         android:allowBackup="true"
