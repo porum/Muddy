@@ -6,4 +6,6 @@ package com.panda912.muddy.plugin.extension
 interface MuddyExtension {
   fun isEnable(enable: Boolean)
   fun setKey(muddyKey: Int)
+  fun excludes(list: List<String>)
+  fun includes(list: List<String>)
 }

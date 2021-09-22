@@ -38,5 +38,12 @@ class MuddyPlugin : Plugin<Project> {
       }
       else -> throw GradleException("Muddy Plugin, Android Application/Library plugin required.")
     }
+
+    target.afterEvaluate {
+      if (muddyExt.excludes.isNotEmpty() && muddyExt.includes.isNotEmpty()) {
+        throw GradleException("Muddy Plugin, can not use 'excludes' and 'includes' both.")
+      }
+    }
+
   }
 }

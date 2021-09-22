@@ -5,7 +5,6 @@ import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
 import com.panda912.muddy.plugin.extension.DefaultMuddyExtension
-import com.panda912.muddy.plugin.utils.Log
 import com.panda912.muddy.plugin.utils.MUDDY_CLASS
 import com.panda912.muddy.plugin.utils.Util
 import com.panda912.muddy.plugin.utils.toInternalName
@@ -29,6 +28,9 @@ class MuddyTransform(
   private val isLibrary: Boolean
 ) : Transform() {
 
+  private lateinit var includes: List<String>
+  private lateinit var excludes: List<String>
+
   override fun getName(): String {
     return "muddy"
   }
@@ -49,10 +51,6 @@ class MuddyTransform(
     super.transform(transformInvocation)
 
     val isIncremental = transformInvocation.isIncremental && isIncremental
-    Log.i(
-      name,
-      "isIncremental: $isIncremental, key: ${extension.muddyKey}, enable: ${extension.enable}"
-    )
 
     // directory or jar path
     val io = ConcurrentHashMap<File, File>()
@@ -130,6 +128,9 @@ class MuddyTransform(
     changedFiles: Map<File, Status>,
     isIncremental: Boolean
   ) {
+    includes = extension.includes.map { it.replace(".", "/") }
+    excludes = extension.excludes.map { it.replace(".", "/") }
+
     io.forEach { (input, output) ->
       if (input.isDirectory) { // directory
         if (isIncremental) {
@@ -202,6 +203,26 @@ class MuddyTransform(
     val cn = ClassNode(Opcodes.ASM7)
     cr.accept(cn, 0)
 
+    val className = cr.className
+
+    if (includes.isEmpty() && excludes.isEmpty()) {
+      modifyBytecode(cn)
+    } else if (includes.isNotEmpty()) {
+      if (includes.any { className.startsWith(it) }) { // class in includes list
+        modifyBytecode(cn)
+      }
+    } else if (excludes.isNotEmpty()) {
+      if (!excludes.any { className.startsWith(it) }) { // class not in excludes list
+        modifyBytecode(cn)
+      }
+    }
+
+    val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
+    cn.accept(cw)
+    return cw.toByteArray()
+  }
+
+  private fun modifyBytecode(cn: ClassNode) {
     val constFields: List<FieldNode> = cn.fields.filter {
       it.desc == "Ljava/lang/String;" && !(it.value as? String).isNullOrEmpty() &&
           (it.access == Opcodes.ACC_STATIC + Opcodes.ACC_FINAL ||
@@ -211,6 +232,20 @@ class MuddyTransform(
     }
 
     for (method in cn.methods) {
+      for (i in 0 until method.instructions.size()) {
+        val insn = method.instructions[i]
+        if (insn is LdcInsnNode && insn.cst is String) {
+          insn.cst = Muddy.xor(insn.cst as String, extension.muddyKey)
+          val muddyMethodInsn = MethodInsnNode(
+            Opcodes.INVOKESTATIC,
+            MUDDY_CLASS.toInternalName(),
+            "xor",
+            "(Ljava/lang/String;)Ljava/lang/String;",
+            false
+          )
+          method.instructions.insert(insn, muddyMethodInsn)
+        }
+      }
       if (method.name == "<clinit>") {
         val insnList = InsnList()
         for (field in constFields) {
@@ -235,27 +270,8 @@ class MuddyTransform(
         }
         insnList.add(method.instructions)
         method.instructions = insnList
-      } else {
-        for (i in 0 until method.instructions.size()) {
-          val insn = method.instructions[i]
-          if (insn is LdcInsnNode && insn.cst is String) {
-            insn.cst = Muddy.xor(insn.cst as String, extension.muddyKey)
-            val muddyMethodInsn = MethodInsnNode(
-              Opcodes.INVOKESTATIC,
-              MUDDY_CLASS.toInternalName(),
-              "xor",
-              "(Ljava/lang/String;)Ljava/lang/String;",
-              false
-            )
-            method.instructions.insert(insn, muddyMethodInsn)
-          }
-        }
       }
     }
-
-    val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
-    cn.accept(cw)
-    return cw.toByteArray()
   }
 
 }
