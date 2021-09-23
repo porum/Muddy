@@ -246,31 +246,41 @@ class MuddyTransform(
           method.instructions.insert(insn, muddyMethodInsn)
         }
       }
-      if (method.name == "<clinit>") {
-        val insnList = InsnList()
-        for (field in constFields) {
-          insnList.add(LdcInsnNode(Muddy.xor(field.value as String, extension.muddyKey)))
-          insnList.add(
-            MethodInsnNode(
-              Opcodes.INVOKESTATIC,
-              MUDDY_CLASS.toInternalName(),
-              "xor",
-              "(Ljava/lang/String;)Ljava/lang/String;",
-              false
-            )
+    }
+
+    if (constFields.isNotEmpty()) {
+      val clinit = cn.methods.find { it.name == "<clinit>" }
+        ?: MethodNode(Opcodes.ASM7, Opcodes.ACC_STATIC, "<clinit>", "()V", null, null)
+
+      val insnList = InsnList()
+      for (field in constFields) {
+        insnList.add(LdcInsnNode(Muddy.xor(field.value as String, extension.muddyKey)))
+        insnList.add(
+          MethodInsnNode(
+            Opcodes.INVOKESTATIC,
+            MUDDY_CLASS.toInternalName(),
+            "xor",
+            "(Ljava/lang/String;)Ljava/lang/String;",
+            false
           )
-          insnList.add(
-            FieldInsnNode(
-              Opcodes.PUTSTATIC,
-              cn.name,
-              field.name,
-              "Ljava/lang/String;"
-            )
+        )
+        insnList.add(
+          FieldInsnNode(
+            Opcodes.PUTSTATIC,
+            cn.name,
+            field.name,
+            "Ljava/lang/String;"
           )
-        }
-        insnList.add(method.instructions)
-        method.instructions = insnList
+        )
+        field.value = null
       }
+      insnList.add(clinit.instructions)
+      if (insnList.last.type != AbstractInsnNode.INSN || insnList.last.opcode != Opcodes.RETURN) {
+        insnList.add(InsnNode(Opcodes.RETURN))
+      }
+      clinit.instructions = insnList
+      cn.methods.removeIf { it.name == "<clinit>" }
+      cn.methods.add(clinit)
     }
   }
 
