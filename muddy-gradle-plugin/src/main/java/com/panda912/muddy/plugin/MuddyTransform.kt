@@ -1,12 +1,10 @@
 package com.panda912.muddy.plugin
 
-import com.android.SdkConstants
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.android.utils.FileUtils
 import com.panda912.muddy.plugin.extension.DefaultMuddyExtension
+import com.panda912.muddy.plugin.utils.FileUtils
 import com.panda912.muddy.plugin.utils.MUDDY_CLASS
-import com.panda912.muddy.plugin.utils.Util
 import com.panda912.muddy.plugin.utils.toInternalName
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -100,7 +98,7 @@ class MuddyTransform(
       if (input.isDirectory) {
         if (isIncremental) {
           changedFiles.filter { it.key.startsWith(input) }.forEach { (changedFile, status) ->
-            val outputClassFile = Util.getOutputFile(input, changedFile, output)
+            val outputClassFile = FileUtils.getOutputFile(input, changedFile, output)
             when (status) {
               Status.ADDED,
               Status.CHANGED -> {
@@ -112,7 +110,7 @@ class MuddyTransform(
         } else {
           output.deleteRecursively()
           input.walkBottomUp().toList().parallelStream().filter { it.isFile }.forEach {
-            val outputClassFile = Util.getOutputFile(input, it, output)
+            val outputClassFile = FileUtils.getOutputFile(input, it, output)
             it.copyTo(outputClassFile)
           }
         }
@@ -135,7 +133,7 @@ class MuddyTransform(
       if (input.isDirectory) { // directory
         if (isIncremental) {
           changedFiles.filter { it.key.startsWith(input) }.forEach { (changedFile, status) ->
-            val outputClassFile = Util.getOutputFile(input, changedFile, output)
+            val outputClassFile = FileUtils.getOutputFile(input, changedFile, output)
             when (status) {
               Status.ADDED,
               Status.CHANGED -> {
@@ -149,9 +147,9 @@ class MuddyTransform(
           output.deleteRecursively()
           // find all class files, exclude Muddy.class
           input.walkBottomUp().toList().parallelStream().filter { it.isFile }.forEach {
-            val outputClassFile = Util.getOutputFile(input, it, output)
-            if (it.name.endsWith(SdkConstants.DOT_CLASS) && it.nameWithoutExtension != "Muddy") {
-              Util.ensureParentDirsCreated(outputClassFile)
+            val outputClassFile = FileUtils.getOutputFile(input, it, output)
+            if (it.name.endsWith(".class") && it.nameWithoutExtension != "Muddy") {
+              FileUtils.ensureParentDirsCreated(outputClassFile)
               outputClassFile.writeBytes(getModifiedClass(it.inputStream()))
             } else {
               it.copyTo(outputClassFile, true)
@@ -250,7 +248,7 @@ class MuddyTransform(
 
     if (constFields.isNotEmpty()) {
       val clinit = cn.methods.find { it.name == "<clinit>" }
-        ?: MethodNode(Opcodes.ASM7, Opcodes.ACC_STATIC, "<clinit>", "()V", null, null)
+        ?: MethodNode(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null)
 
       val insnList = InsnList()
       for (field in constFields) {
