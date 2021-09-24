@@ -198,7 +198,7 @@ class MuddyTransform(
   @Throws(IOException::class)
   private fun getModifiedClass(inputStream: InputStream): ByteArray {
     val cr = ClassReader(inputStream)
-    val cn = ClassNode(Opcodes.ASM7)
+    val cn = ClassNode(Opcodes.ASM9)
     cr.accept(cn, 0)
 
     val className = cr.className
@@ -230,8 +230,7 @@ class MuddyTransform(
     }
 
     for (method in cn.methods) {
-      for (i in 0 until method.instructions.size()) {
-        val insn = method.instructions[i]
+      for (insn in method.instructions.toArray()) {
         if (insn is LdcInsnNode && insn.cst is String) {
           insn.cst = Muddy.xor(insn.cst as String, extension.muddyKey)
           val muddyMethodInsn = MethodInsnNode(
