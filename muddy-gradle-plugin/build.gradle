@@ -1,8 +1,7 @@
 plugins {
-    id 'java-library'
     id 'kotlin'
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '0.15.0'
+    id 'com.gradle.plugin-publish' version '0.19.0'
     id 'maven-publish'
 }
 
@@ -16,6 +15,7 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
     implementation gradleApi()
     implementation "org.ow2.asm:asm-tree:9.2"
+    implementation project(":muddy")
 }
 
 // https://docs.gradle.org/current/userguide/java_gradle_plugin.html

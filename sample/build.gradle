@@ -5,24 +5,7 @@ plugins {
 }
 
 muddy {
-    enable true
-    key 2022
-    excludes = [
-            "android",
-            "androidx",
-            "kotlin",
-            "kotlinx",
-            "dagger",
-            "io.reactivex",
-            "leakcanary",
-            "okhttp3",
-            "okio",
-            "retrofit2",
-            "com.google",
-            "com.facebook",
-            "com.squareup",
-            "com.bumptech.glide"
-    ]
+    includes = ["com.panda912"]
 }
 
 android {
@@ -49,4 +32,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+}
+
+dependencies {
+//    implementation project(":muddy")
+    implementation "io.github.porum:muddy:$VERSION"
 }

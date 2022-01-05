@@ -13,7 +13,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$AGP_VERSION"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
         classpath "io.github.porum:muddy-gradle-plugin:$VERSION"
     }
 }
@@ -41,10 +41,20 @@ allprojects {
     }
 }
 
+Properties props = new Properties()
+props.load(new FileInputStream(rootProject.file("local.properties")))
+project.ext {
+    setProperty("sonatypeUserName", props["sonatypeUserName"])
+    setProperty("sonatypePassword", props["sonatypePassword"])
+    setProperty("signing.keyId", props["signing.keyId"])
+    setProperty("signing.password", props["signing.password"])
+    setProperty("signing.secretKeyRingFile", props["signing.secretKeyRingFile"])
+}
+
 File publishScript = project.file("publish.gradle")
 
 subprojects {
-    if (name == "muddy-gradle-plugin") {
+    if (name.startsWith("muddy")) {
         apply from: publishScript
     }
 

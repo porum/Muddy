@@ -5,6 +5,10 @@
 
 Muddy is a android gradle plugin that can obfuscate the const string in APK.
 
+## Thanks
+
+[TrueLicense](https://github.com/christian-schlichtherle/truelicense)
+
 ## License
 
 ```
