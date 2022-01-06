@@ -6,9 +6,6 @@ buildscript {
     repositories {
         google()
         mavenLocal()
-        maven {
-            url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-        }
         mavenCentral()
     }
     dependencies {
@@ -19,16 +16,12 @@ buildscript {
 }
 
 allprojects {
-
     group = GROUP
     version = VERSION
 
     repositories {
         google()
         mavenLocal()
-        maven {
-            url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-        }
         mavenCentral()
     }
 
@@ -41,10 +34,20 @@ allprojects {
     }
 }
 
+Properties props = new Properties()
+props.load(new FileInputStream(rootProject.file("local.properties")))
+project.ext {
+    setProperty("sonatypeUserName", props["sonatypeUserName"])
+    setProperty("sonatypePassword", props["sonatypePassword"])
+    setProperty("signing.keyId", props["signing.keyId"])
+    setProperty("signing.password", props["signing.password"])
+    setProperty("signing.secretKeyRingFile", props["signing.secretKeyRingFile"])
+}
+
 File publishScript = project.file("publish.gradle")
 
 subprojects {
-    if (name == "muddy-gradle-plugin") {
+    if (name.startsWith("muddy")) {
         apply from: publishScript
     }
 

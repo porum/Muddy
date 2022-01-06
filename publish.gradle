@@ -5,79 +5,87 @@ apply plugin: "signing"
 // configure your publications using the afterEvaluate() lifecycle method.
 afterEvaluate {
 
-    if (!plugins.hasPlugin("android")) {
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allSource
+        archiveClassifier.set("sources")
+    }
 
-        task sourceJar(type: Jar) {
-            from sourceSets.main.allSource
-            archiveClassifier.set("sources")
-        }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        archiveClassifier.set("javadoc")
+        from javadoc.destinationDir
+    }
 
-        task javadocJar(type: Jar, dependsOn: javadoc) {
-            archiveClassifier.set("javadoc")
-            from javadoc.destinationDir
-        }
+    // https://docs.gradle.org/current/userguide/publishing_maven.html
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // The default Maven POM identifying attributes are mapped as follows:
+                // groupId - project.group
+                // artifactId - project.name
+                // version - project.version
 
-        // https://docs.gradle.org/current/userguide/publishing_maven.html
-        publishing {
-            publications {
-                // Creates a Maven publication called "release".
-                release(MavenPublication) {
-                    // The default Maven POM identifying attributes are mapped as follows:
-                    // groupId - project.group
-                    // artifactId - project.name
-                    // version - project.version
+                from components.java
+                artifact sourceJar
+                artifact javadocJar
 
-                    // Applies the component for the release build variant.
-                    from components.java
-                    artifact sourceJar
-                    artifact javadocJar
-
-                    pom {
-                        name = 'muddy-plugin'
-                        description = 'Muddy is an Android Plugin for simple encryption of string constants in android project.'
-                        url = 'https://github.com/porum/Muddy'
-                        licenses {
-                            license {
-                                name = 'The Apache License, Version 2.0'
-                                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                            }
-                        }
-                        developers {
-                            developer {
-                                id = 'porum'
-                                name = 'sunguo.sun'
-                                email = 'sunguobao12@gmail.com'
-                            }
-                        }
-                        scm {
-                            url = "https://github.com/porum/Muddy.git"
+                pom {
+                    name = 'muddy-plugin'
+                    description = 'Muddy is an Android Plugin for simple encryption of string constants in android project.'
+                    url = 'https://github.com/porum/Muddy'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
-                }
-            }
+                    developers {
+                        developer {
+                            id = 'porum'
+                            name = 'sunguo.sun'
+                            email = 'sunguobao12@gmail.com'
+                        }
+                    }
+                    scm {
+                        url = "https://github.com/porum/Muddy.git"
+                    }
 
-            repositories {
-                maven {
-                    if (VERSION.endsWith("-SNAPSHOT")) {
-                        url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-                    } else {
-                        url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                    }
-                    credentials {
-                        username sonatypeUserName
-                        password sonatypePassword
-                    }
+//                    if (project.name == "muddy-gradle-plugin") {
+//                        withXml {
+//                            def projectNode = asNode()
+//                            def depsNode = projectNode.appendNode("dependencies")
+//                            def depNode = depsNode.appendNode("dependency")
+//                            depNode.appendNode("groupId", project.group)
+//                            depNode.appendNode("artifactId", "muddy")
+//                            depNode.appendNode("version", project.version)
+//                            depNode.appendNode("scope", "compile")
+//                        }
+//                    }
                 }
             }
         }
-        signing {
-            sign publishing.publications.release
-        }
 
-        javadoc {
-            if (JavaVersion.current().isJava9Compatible()) {
-                options.addBooleanOption('html5', true)
+        repositories {
+            maven {
+                if (VERSION.endsWith("-SNAPSHOT")) {
+                    url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                } else {
+                    url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                }
+                credentials {
+                    username sonatypeUserName
+                    password sonatypePassword
+                }
             }
+        }
+    }
+    signing {
+        sign publishing.publications.release
+    }
+
+    javadoc {
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.addBooleanOption('html5', true)
         }
     }
 }
