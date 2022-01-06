@@ -1,9 +1,9 @@
 package com.panda912.muddy.plugin
 
+import com.android.build.api.extension.AndroidComponentsExtension
 import com.android.build.api.instrumentation.*
 import com.android.build.api.instrumentation.InstrumentationScope.ALL
 import com.android.build.api.instrumentation.InstrumentationScope.PROJECT
-import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.LibraryVariant
 import org.gradle.api.GradleException

@@ -6,29 +6,22 @@ buildscript {
     repositories {
         google()
         mavenLocal()
-        maven {
-            url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-        }
         mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$AGP_VERSION"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
         classpath "io.github.porum:muddy-gradle-plugin:$VERSION"
     }
 }
 
 allprojects {
-
     group = GROUP
     version = VERSION
 
     repositories {
         google()
         mavenLocal()
-        maven {
-            url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-        }
         mavenCentral()
     }
 

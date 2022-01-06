@@ -15,6 +15,7 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
     implementation gradleApi()
     implementation "org.ow2.asm:asm-tree:9.2"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN_VERSION"
     implementation project(":muddy")
 }
 
