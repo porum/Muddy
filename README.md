@@ -1,7 +1,7 @@
 # Muddy
 
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-[![muddy-gradle-plugin](https://img.shields.io/badge/muddy--gradle--plugin-2.0.0-brightgreen.svg)](https://search.maven.org/artifact/io.github.porum/muddy-gradle-plugin/2.0.0/jar)
+[![muddy-gradle-plugin](https://img.shields.io/badge/muddy--gradle--plugin-2.0.1-brightgreen.svg)](https://search.maven.org/artifact/io.github.porum/muddy-gradle-plugin/2.0.1/jar)
 
 Muddy is a android gradle plugin that can obfuscate the const string in APK.
 
