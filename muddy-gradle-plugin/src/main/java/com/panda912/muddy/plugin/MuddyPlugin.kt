@@ -1,9 +1,9 @@
 package com.panda912.muddy.plugin
 
-import com.android.build.api.extension.AndroidComponentsExtension
 import com.android.build.api.instrumentation.*
 import com.android.build.api.instrumentation.InstrumentationScope.ALL
 import com.android.build.api.instrumentation.InstrumentationScope.PROJECT
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.LibraryVariant
 import org.gradle.api.GradleException
@@ -16,7 +16,6 @@ import org.objectweb.asm.ClassVisitor
 /**
  * Created by panda on 2021/7/28 9:08
  */
-@Suppress("UnstableApiUsage")
 class MuddyPlugin : Plugin<Project> {
 
   override fun apply(project: Project) {
@@ -27,22 +26,20 @@ class MuddyPlugin : Plugin<Project> {
         throw GradleException("muddy not support current variant: $variant")
       }
       val scope = if (variant is ApplicationVariant) ALL else PROJECT
-      variant.transformClassesWith(MuddyClassVisitorFactory::class.java, scope) {
+      variant.instrumentation.transformClassesWith(MuddyClassVisitorFactory::class.java, scope) {
         it.includes.set(extension.includes)
       }
-      variant.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
+      variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
     }
   }
 }
 
-@Suppress("UnstableApiUsage")
 interface FilterParamsImpl : InstrumentationParameters {
 
   @get:Input
   val includes: ListProperty<String>
 }
 
-@Suppress("UnstableApiUsage")
 abstract class MuddyClassVisitorFactory : AsmClassVisitorFactory<FilterParamsImpl> {
   override fun createClassVisitor(
     classContext: ClassContext,
