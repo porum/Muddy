@@ -1,0 +1,19 @@
+plugins {
+    id 'kotlin'
+    id 'maven-publish'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    compileOnly "com.android.tools.build:gradle:$AGP_VERSION"
+    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+    implementation gradleApi()
+    implementation "org.ow2.asm:asm-tree:9.2"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN_VERSION"
+    implementation project(":muddy")
+    implementation "com.bytedance.android.byteX:common:$BYTEX_VERSION"
+}

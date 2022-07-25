@@ -2,16 +2,26 @@ import java.util.concurrent.TimeUnit
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    ext {
+        useBytex = USE_BYTEX == "true"
+    }
 
     repositories {
         google()
         mavenLocal()
         mavenCentral()
+        maven { url "https://artifact.bytedance.com/repository/byteX/" }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$AGP_VERSION"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
-        classpath "io.github.porum:muddy-gradle-plugin:$VERSION"
+
+        if (useBytex) {
+            classpath "com.bytedance.android.byteX:base-plugin:$BYTEX_VERSION"
+            classpath "io.github.porum:muddy-gradle-plugin-bytex:$VERSION"
+        } else {
+            classpath "io.github.porum:muddy-gradle-plugin:$VERSION"
+        }
     }
 }
 
@@ -23,6 +33,7 @@ allprojects {
         google()
         mavenLocal()
         mavenCentral()
+        maven { url "https://artifact.bytedance.com/repository/byteX/" }
     }
 
     tasks.withType(Javadoc) {

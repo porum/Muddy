@@ -4,8 +4,25 @@ plugins {
     id 'muddy-plugin'
 }
 
-muddy {
-    includes = ["com.panda912"]
+if(useBytex) {
+    apply plugin: "bytex"
+
+    ByteX {
+        enable true
+        enableInDebug true
+        logLevel "DEBUG"
+    }
+
+    muddy {
+        enable true
+        enableInDebug true
+        logLevel "DEBUG"
+        includes = ["com.panda912"]
+    }
+} else {
+    muddy {
+        includes = ["com.panda912"]
+    }
 }
 
 android {

@@ -1,4 +1,9 @@
 rootProject.name = "Muddy"
 include ':sample'
 include ':muddy'
-include ':muddy-gradle-plugin'
+if (getProperties().get("USE_BYTEX", false).toBoolean()) {
+    include ':muddy-gradle-plugin-bytex'
+} else {
+    include ':muddy-gradle-plugin'
+}
+
